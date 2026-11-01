@@ -251,7 +251,12 @@ def optimize_sizing(
 # Out-of-sample evaluation (fast rule-based dispatch, no solver)
 # ----------------------------------------------------------------------------
 def dispatch_day(d: Design, sc: Scenario, tech: Tech, warmup_days: int = 2):
-    """Solar first, then battery, then diesel. Returns (unmet, diesel, served) kWh for the day."""
+    """Realistic controller ('cycle charging', the standard mini-grid strategy):
+    solar first, then battery. When the battery cannot cover the gap, the diesel
+    starts and runs at full rated output; whatever the load does not use charges
+    the battery. A low-battery rule also starts the diesel early in the evening
+    if the battery is below 40% after sunset. No foresight of tomorrow's demand.
+    Returns (unmet, diesel, served) kWh for the day."""
     soc_min, soc_max = tech.batt_min_soc * d.batt_kwh, d.batt_kwh
     p_max = tech.batt_c_rate * d.batt_kwh
     soc = soc_min + 0.5 * (soc_max - soc_min)
@@ -265,16 +270,28 @@ def dispatch_day(d: Design, sc: Scenario, tech: Tech, warmup_days: int = 2):
                 c = min(net, p_max, (soc_max - soc) / tech.batt_eff_charge)
                 soc += c * tech.batt_eff_charge
                 served += load
-            else:
-                need = -net
-                dch = min(need, p_max, (soc - soc_min) * tech.batt_eff_discharge)
+                continue
+            need = -net
+            avail = min(p_max, (soc - soc_min) * tech.batt_eff_discharge)
+            low_evening = t >= 18 and soc < soc_min + 0.4 * (soc_max - soc_min)
+            if (avail >= need and not low_evening) or d.diesel_kw <= 0:
+                dch = min(need, avail)
                 soc -= dch / tech.batt_eff_discharge
                 need -= dch
-                g = min(need, d.diesel_kw)
-                diesel += g
-                need -= g
-                unmet += need
-                served += load - need
+            else:
+                g = d.diesel_kw                                # run at full output
+                use = min(g, need)
+                need -= use
+                spare = g - use                                # charge battery with the rest
+                c = min(spare, p_max, (soc_max - soc) / tech.batt_eff_charge)
+                soc += c * tech.batt_eff_charge
+                diesel += use + c
+                if need > 0:                                   # diesel maxed out: battery helps
+                    dch = min(need, min(p_max, (soc - soc_min) * tech.batt_eff_discharge))
+                    soc -= dch / tech.batt_eff_discharge
+                    need -= dch
+            unmet += need
+            served += load - need
     return unmet, diesel, served
 
 
@@ -356,3 +373,52 @@ if __name__ == "__main__":
     whatif = compare_designs(extra_load_kw=mill_load_kw(3))
     show(whatif, "What-if: finance 3 grain mills (daytime load)")
     print(f"\nSolved in {time.time() - t0:.0f}s. Cost inputs are placeholders - replace before quoting.")
+
+
+# ----------------------------------------------------------------------------
+# Live planning API used by the app
+# ----------------------------------------------------------------------------
+def cold_room_load_kw(n_rooms: int, kw_each: float = 0.6) -> np.ndarray:
+    """What-if helper: small cold rooms / commercial fridges running all day (illustrative 0.6 kW each)."""
+    return np.full(HOURS, n_rooms * kw_each)
+
+
+def plan_to_target(n_customers, kwh, business_share, extra_load_kw=None, costs: Costs = Costs(),
+                   tech: Tech = Tech(), target: float = 0.95, n_train: int = 40, n_test: int = 500,
+                   seed: int = 1, margins=(1.0, 1.05, 1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.65, 1.8)):
+    """Size the system so it meets `target` reliable days OUT OF SAMPLE.
+
+    1. Sample training and fresh test scenarios (Monte Carlo).
+    2. Solve the scenario-robust sizing problem (every training scenario must keep
+       unmet demand under 5%), with demand scaled by a safety margin m.
+    3. Test the design on the fresh scenarios with the realistic controller.
+    4. Raise m until the tested reliability reaches the target.
+    Returns (usual_practice_row, lumora_row).
+    """
+    train = sample_scenarios(n_customers, kwh, business_share, n_train, tech, seed, extra_load_kw)
+    test = sample_scenarios(n_customers, kwh, business_share, n_test, tech, seed + 999, extra_load_kw)
+
+    det = optimize_sizing([median_scenario(train)], costs, tech, 0.95, prob=0.0,
+                          label="sized for P50 (deterministic)")
+    det_row = evaluate(det, test, costs, tech)
+
+    best = None
+    for m in margins:
+        scaled = [Scenario(s.demand_kw * m, s.solar_kw_per_kwp) for s in train]
+        d = optimize_sizing(scaled, costs, tech, 0.95, prob=1.0, label="Lumora (stochastic)")
+        row = evaluate(d, test, costs, tech)
+        row["safety_margin"] = m
+        best = row
+        if row["reliable_share"] >= target:
+            break
+    best["target"] = target
+    best["target_met"] = best["reliable_share"] >= target
+    return det_row, best
+
+
+def stress_test(row: dict, n_customers, kwh, business_share, extra_load_kw=None,
+                costs: Costs = Costs(), tech: Tech = Tech(), n_test: int = 500, seed: int = 2024) -> dict:
+    """Keep an already-sized system and test it under a different future (no re-optimization)."""
+    test = sample_scenarios(n_customers, kwh, business_share, n_test, tech, seed, extra_load_kw)
+    d = Design(row["pv_kw"], row["batt_kwh"], row["diesel_kw"], "system already built")
+    return evaluate(d, test, costs, tech)

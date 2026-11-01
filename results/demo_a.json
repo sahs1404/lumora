@@ -1,0 +1,103 @@
+{
+  "village_id": "demo_a",
+  "scenarios": {
+    "base": {
+      "label": "Base case",
+      "designs": [
+        {
+          "design": "sized for P50 (deterministic)",
+          "pv_kw": 21.9,
+          "batt_kwh": 71.6,
+          "diesel_kw": 0.0,
+          "reliable_share": 0.577,
+          "reliable_95ci": "0.521-0.633",
+          "mean_unmet_pct": 13.94,
+          "diesel_share_pct": 0.0,
+          "cost_of_power_usd_kwh": 0.238,
+          "cop_p10_p50_p90": "0.175/0.233/0.374",
+          "annual_cost_usd": 7287
+        },
+        {
+          "design": "Lumora (stochastic)",
+          "pv_kw": 24.0,
+          "batt_kwh": 49.2,
+          "diesel_kw": 6.4,
+          "reliable_share": 0.823,
+          "reliable_95ci": "0.780-0.866",
+          "mean_unmet_pct": 3.18,
+          "diesel_share_pct": 21.1,
+          "cost_of_power_usd_kwh": 0.252,
+          "cop_p10_p50_p90": "0.223/0.247/0.340",
+          "annual_cost_usd": 9504
+        }
+      ]
+    },
+    "mills3": {
+      "label": "Finance 3 grain mills",
+      "designs": [
+        {
+          "design": "sized for P50 (deterministic)",
+          "pv_kw": 50.2,
+          "batt_kwh": 96.4,
+          "diesel_kw": 0.0,
+          "reliable_share": 0.57,
+          "reliable_95ci": "0.514-0.626",
+          "mean_unmet_pct": 8.99,
+          "diesel_share_pct": 0.0,
+          "cost_of_power_usd_kwh": 0.156,
+          "cop_p10_p50_p90": "0.131/0.158/0.189",
+          "annual_cost_usd": 12374
+        },
+        {
+          "design": "Lumora (stochastic)",
+          "pv_kw": 57.6,
+          "batt_kwh": 72.1,
+          "diesel_kw": 6.2,
+          "reliable_share": 0.873,
+          "reliable_95ci": "0.836-0.911",
+          "mean_unmet_pct": 1.99,
+          "diesel_share_pct": 7.8,
+          "cost_of_power_usd_kwh": 0.169,
+          "cop_p10_p50_p90": "0.156/0.166/0.190",
+          "annual_cost_usd": 14709
+        }
+      ]
+    },
+    "low_demand": {
+      "label": "Demand comes in 50% below forecast (system already built)",
+      "designs": [
+        {
+          "design": "sized for P50 (deterministic)",
+          "pv_kw": 21.9,
+          "batt_kwh": 71.6,
+          "diesel_kw": 0.0,
+          "reliable_share": 0.873,
+          "reliable_95ci": "0.836-0.911",
+          "mean_unmet_pct": 2.91,
+          "diesel_share_pct": 0.0,
+          "cost_of_power_usd_kwh": 0.363,
+          "cop_p10_p50_p90": "0.216/0.402/0.805",
+          "annual_cost_usd": 7289
+        },
+        {
+          "design": "Lumora (stochastic)",
+          "pv_kw": 24.0,
+          "batt_kwh": 49.2,
+          "diesel_kw": 6.4,
+          "reliable_share": 0.98,
+          "reliable_95ci": "0.964-0.996",
+          "mean_unmet_pct": 0.37,
+          "diesel_share_pct": 8.7,
+          "cost_of_power_usd_kwh": 0.342,
+          "cop_p10_p50_p90": "0.242/0.366/0.734",
+          "annual_cost_usd": 7308
+        }
+      ]
+    }
+  },
+  "settings": {
+    "n_train": 60,
+    "n_test": 300,
+    "costs": "placeholder"
+  }
+}

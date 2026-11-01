@@ -1,0 +1,86 @@
+{
+  "_note": "PLACEHOLDER VALUES - replace every number with real outputs (features: Sahasra, forecast: Sahasra, growth: Manas). Coordinates are placeholders too: pick 3 real unelectrified villages.",
+  "villages": [
+    {
+      "id": "demo_a",
+      "name": "Demo village A",
+      "country": "Kenya",
+      "lat": 1.30,
+      "lon": 36.80,
+      "features": {
+        "buildings": 410,
+        "est_customers": 250,
+        "businesses_detected": 38,
+        "metal_roof_share": 0.62,
+        "nightlight_radiance": 0.4,
+        "dist_to_grid_km": 34.0,
+        "dist_to_market_km": 1.2
+      },
+      "overlay_image": "data/overlays/demo_a.png",
+      "forecast_kwh_customer_month": {"p10": 6.0, "p50": 12.0, "p90": 24.0},
+      "business_share_of_load": 0.25,
+      "growth_multiplier_by_year": [1.0, 1.35, 1.6, 1.75],
+      "drivers": [
+        {"feature": "Businesses detected", "effect_kwh_month": 3.1},
+        {"feature": "Metal roof share", "effect_kwh_month": 2.2},
+        {"feature": "Distance to market", "effect_kwh_month": -1.4},
+        {"feature": "Night lights", "effect_kwh_month": 0.8},
+        {"feature": "Distance to grid", "effect_kwh_month": -0.5}
+      ]
+    },
+    {
+      "id": "demo_b",
+      "name": "Demo village B",
+      "country": "Nigeria",
+      "lat": 10.50,
+      "lon": 7.40,
+      "features": {
+        "buildings": 820,
+        "est_customers": 500,
+        "businesses_detected": 95,
+        "metal_roof_share": 0.78,
+        "nightlight_radiance": 0.9,
+        "dist_to_grid_km": 18.0,
+        "dist_to_market_km": 0.4
+      },
+      "overlay_image": "data/overlays/demo_b.png",
+      "forecast_kwh_customer_month": {"p10": 9.0, "p50": 18.0, "p90": 35.0},
+      "business_share_of_load": 0.35,
+      "growth_multiplier_by_year": [1.0, 1.4, 1.7, 1.9],
+      "drivers": [
+        {"feature": "Businesses detected", "effect_kwh_month": 4.5},
+        {"feature": "Metal roof share", "effect_kwh_month": 2.9},
+        {"feature": "Night lights", "effect_kwh_month": 1.6},
+        {"feature": "Distance to market", "effect_kwh_month": 0.9},
+        {"feature": "Distance to grid", "effect_kwh_month": -0.3}
+      ]
+    },
+    {
+      "id": "demo_c",
+      "name": "Demo village C",
+      "country": "Tanzania",
+      "lat": -2.50,
+      "lon": 32.90,
+      "features": {
+        "buildings": 260,
+        "est_customers": 150,
+        "businesses_detected": 12,
+        "metal_roof_share": 0.35,
+        "nightlight_radiance": 0.1,
+        "dist_to_grid_km": 52.0,
+        "dist_to_market_km": 4.8
+      },
+      "overlay_image": "data/overlays/demo_c.png",
+      "forecast_kwh_customer_month": {"p10": 3.0, "p50": 6.0, "p90": 13.0},
+      "business_share_of_load": 0.12,
+      "growth_multiplier_by_year": [1.0, 1.25, 1.45, 1.55],
+      "drivers": [
+        {"feature": "Metal roof share", "effect_kwh_month": -1.5},
+        {"feature": "Distance to market", "effect_kwh_month": -1.9},
+        {"feature": "Businesses detected", "effect_kwh_month": 0.6},
+        {"feature": "Distance to grid", "effect_kwh_month": -0.7},
+        {"feature": "Night lights", "effect_kwh_month": -0.4}
+      ]
+    }
+  ]
+}
